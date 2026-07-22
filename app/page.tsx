@@ -672,29 +672,29 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
   }, [])
 
   const suspiciousContacts = [
-    { name: "J. R.", label: "AMOR", img: "/images/female-placeholder-1.jpeg", tags: ["DELETING", "SUSPICIOUS"], audio: false },
-    { name: "L. M.", label: "GYM", img: "/images/male-placeholder-1.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
-    { name: "Blocked Contact", label: "", img: "/images/female-placeholder-2.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
-    { name: "C. S.", label: "WORK?", img: "/images/female-placeholder-3.jpeg", tags: ["DELETING", "SUSPICIOUS"], audio: true },
-    { name: "Deleted Contact", label: "SAVED", img: "/images/female-placeholder-4.jpeg", tags: ["DELETING", "SUSPICIOUS", "EVIDENCE"], audio: false },
+    { name: "J. R.", label: "AMOR", img: "/images/new-woman-1.jpeg", tags: ["DELETING", "SUSPICIOUS"], audio: false },
+    { name: "L. M.", label: "GYM", img: "/images/new-man-3.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
+    { name: "Blocked Contact", label: "", img: "/images/new-woman-5.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
+    { name: "C. S.", label: "WORK?", img: "/images/new-woman-2.jpg", tags: ["DELETING", "SUSPICIOUS"], audio: true },
+    { name: "Deleted Contact", label: "SAVED", img: "/images/new-woman-3.jpg", tags: ["DELETING", "SUSPICIOUS", "EVIDENCE"], audio: false },
   ]
 
   const receivedCalls = [
-    { name: "J. R.", time: "02:47 AM", duration: "48 min", img: "/images/female-placeholder-1.jpeg" },
-    { name: "Unknown Number", time: "11:32 PM", duration: "1h 12min", img: "/images/female-placeholder-2.jpeg" },
-    { name: "C. S.", time: "01:15 AM", duration: "27 min", img: "/images/female-placeholder-3.jpeg" },
-    { name: "Blocked Contact", time: "03:04 AM", duration: "9 min", img: "/images/female-placeholder-4.jpeg" },
-    { name: "L. M.", time: "09:58 PM", duration: "33 min", img: "/images/male-placeholder-1.jpeg" },
-    { name: "Deleted Contact", time: "12:41 AM", duration: "54 min", img: "/images/female-placeholder-5.jpeg" },
+    { name: "J. R.", time: "02:47 AM", duration: "48 min", img: "/images/new-woman-1.jpeg" },
+    { name: "Unknown Number", time: "11:32 PM", duration: "1h 12min", img: "/images/new-man-1.jpg" },
+    { name: "C. S.", time: "01:15 AM", duration: "27 min", img: "/images/new-woman-2.jpg" },
+    { name: "Blocked Contact", time: "03:04 AM", duration: "9 min", img: "/images/new-woman-3.jpg" },
+    { name: "L. M.", time: "09:58 PM", duration: "33 min", img: "/images/new-man-2.jpeg" },
+    { name: "Deleted Contact", time: "12:41 AM", duration: "54 min", img: "/images/new-woman-4.avif" },
   ]
 
   const madeCalls = [
-    { name: "J. R.", time: "10:22 PM", duration: "1h 03min", img: "/images/female-placeholder-1.jpeg" },
-    { name: "C. S.", time: "02:19 AM", duration: "41 min", img: "/images/female-placeholder-3.jpeg" },
-    { name: "Unknown Number", time: "11:47 PM", duration: "18 min", img: "/images/female-placeholder-6.avif" },
-    { name: "Blocked Contact", time: "12:08 AM", duration: "36 min", img: "/images/female-placeholder-2.jpeg" },
-    { name: "L. M.", time: "08:53 PM", duration: "22 min", img: "/images/male-placeholder-1.jpeg" },
-    { name: "Deleted Contact", time: "03:29 AM", duration: "1h 27min", img: "/images/female-placeholder-7.jpeg" },
+    { name: "J. R.", time: "10:22 PM", duration: "1h 03min", img: "/images/new-woman-5.jpeg" },
+    { name: "C. S.", time: "02:19 AM", duration: "41 min", img: "/images/new-man-3.jpeg" },
+    { name: "Unknown Number", time: "11:47 PM", duration: "18 min", img: "/images/new-woman-2.jpg" },
+    { name: "Blocked Contact", time: "12:08 AM", duration: "36 min", img: "/images/new-woman-3.jpg" },
+    { name: "L. M.", time: "08:53 PM", duration: "22 min", img: "/images/new-man-1.jpg" },
+    { name: "Deleted Contact", time: "03:29 AM", duration: "1h 27min", img: "/images/new-woman-4.avif" },
   ]
 
   const audioMessages = [
@@ -710,12 +710,12 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
   ]
 
   const mediaItems = [
-    "/images/liked-photo-1.jpeg",
-    "/images/liked-photo-2.jpeg",
-    "/images/female-placeholder-5.jpeg",
-    "/images/female-placeholder-6.avif",
-    "/images/female-placeholder-7.jpeg",
-    "/images/female-placeholder-8.jpeg",
+    "/images/new-woman-2.jpg",
+    "/images/new-man-2.jpeg",
+    "/images/new-woman-4.avif",
+    "/images/new-man-1.jpg",
+    "/images/new-woman-5.jpeg",
+    "/images/new-woman-3.jpg",
   ]
 
   const tagColor = (tag: string) => {
