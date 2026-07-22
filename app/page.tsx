@@ -650,7 +650,7 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
   liveViewers: number
 }) {
   const [showExtra, setShowExtra] = useState(false)
-  const [notice, setNotice] = useState<string | null>(null)
+  const [notice, setNotice] = useState<{ message: string; x: number; y: number } | null>(null)
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Reveal the extra sections (calls & audios) after 5 seconds
@@ -659,10 +659,10 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
     return () => clearTimeout(t)
   }, [])
 
-  const triggerNotice = (message: string) => {
-    setNotice(message)
+  const triggerNotice = (e: React.MouseEvent, message: string) => {
+    setNotice({ message, x: e.clientX, y: e.clientY })
     if (noticeTimer.current) clearTimeout(noticeTimer.current)
-    noticeTimer.current = setTimeout(() => setNotice(null), 3500)
+    noticeTimer.current = setTimeout(() => setNotice(null), 2500)
   }
 
   useEffect(() => {
@@ -820,7 +820,7 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
               <button
                 key={i}
                 type="button"
-                onClick={() => triggerNotice("Complete your search to view this media")}
+                onClick={(e) => triggerNotice(e, "Complete your search to see it")}
                 className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
               >
                 <img
@@ -915,7 +915,7 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
               <div key={i} className="flex items-center gap-3 rounded-lg bg-background/60 border border-border p-2">
                 <button
                   type="button"
-                  onClick={() => triggerNotice("Complete access to listen to this audio")}
+                  onClick={(e) => triggerNotice(e, "Complete access to listen")}
                   className="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/40 flex items-center justify-center shrink-0 hover:bg-green-500/25 transition-colors"
                   aria-label="Play audio"
                 >
@@ -946,14 +946,15 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
         </div>
       )}
 
-      {/* Notification toast */}
+      {/* Notification toast - small, appears right at the click */}
       {notice && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm animate-fade-in">
-          <div className="flex items-center gap-3 rounded-xl bg-card border border-pink-500/40 shadow-2xl px-4 py-3">
-            <div className="w-8 h-8 rounded-full gradient-premium flex items-center justify-center shrink-0">
-              <Lock size={15} className="text-white" />
-            </div>
-            <p className="text-sm font-semibold text-foreground text-left flex-1">{notice}</p>
+        <div
+          className="fixed z-50 -translate-x-1/2 -translate-y-full animate-fade-in pointer-events-none"
+          style={{ left: notice.x, top: notice.y - 8 }}
+        >
+          <div className="flex items-center gap-1.5 rounded-lg bg-card border border-pink-500/50 shadow-xl px-2.5 py-1.5 whitespace-nowrap">
+            <Lock size={12} className="text-pink-500 shrink-0" />
+            <span className="text-[11px] font-semibold text-foreground">{notice.message}</span>
           </div>
         </div>
       )}
