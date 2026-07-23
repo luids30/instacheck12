@@ -76,51 +76,66 @@ export async function POST(request: NextRequest) {
 
     let photoUrl: string | null = null
 
-    try {
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
-          "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ phone_number: fullPhone }),
-      })
+    // Tenta ate 3 vezes, com backoff, para lidar com rate limit (429)
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "x-rapidapi-key": "42865ce77amsh6b3ec8ac168e4c3p1ae1b6jsndc1ea20ce2d0",
+            "x-rapidapi-host": "whatsapp-profile-data1.p.rapidapi.com",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phone_number: fullPhone }),
+        })
 
-      console.log("[v0] API Response status:", response.status)
+        console.log("[v0] API Response status:", response.status, "attempt", attempt + 1)
 
-      if (response.ok) {
-        const responseText = await response.text()
-        console.log("[v0] API Response (first 200 chars):", responseText.substring(0, 200))
-
-        try {
-          const jsonResponse = JSON.parse(responseText)
-          photoUrl = jsonResponse.url ||
-                     jsonResponse.urlImage ||
-                     jsonResponse.profile_pic || 
-                     jsonResponse.profilePic || 
-                     jsonResponse.picture || 
-                     jsonResponse.photo || 
-                     jsonResponse.result
-          console.log("[v0] Extracted photo URL:", photoUrl)
-        } catch {
-          console.log("[v0] Response is not JSON")
+        // Rate limit (429)
+        if (response.status === 429) {
+          const body = await response.text().catch(() => "")
+          // Quota mensal esgotada: nao adianta tentar de novo
+          if (/quota/i.test(body)) {
+            console.log("[v0] Monthly quota exceeded - upgrade RapidAPI plan or add a new key")
+            break
+          }
+          // Rate limit transitorio: aguarda e tenta de novo
+          const wait = 600 * (attempt + 1)
+          console.log("[v0] Rate limited (429), retrying in", wait, "ms")
+          await new Promise((r) => setTimeout(r, wait))
+          continue
         }
+
+        if (response.ok) {
+          const responseText = await response.text()
+          console.log("[v0] API Response (first 200 chars):", responseText.substring(0, 200))
+
+          try {
+            const jsonResponse = JSON.parse(responseText)
+            photoUrl =
+              jsonResponse.url ||
+              jsonResponse.urlImage ||
+              jsonResponse.profile_pic ||
+              jsonResponse.profilePic ||
+              jsonResponse.picture ||
+              jsonResponse.photo ||
+              (typeof jsonResponse.result === "string" ? jsonResponse.result : null)
+            console.log("[v0] Extracted photo URL:", photoUrl)
+          } catch {
+            console.log("[v0] Response is not JSON")
+          }
+        }
+      } catch (fetchError) {
+        console.error("[v0] Fetch error:", fetchError)
       }
-    } catch (fetchError) {
-      console.error("[v0] Fetch error:", fetchError)
+      // Sai do loop se obteve foto ou se nao foi rate limit
+      break
     }
 
-    // Se nao conseguiu foto valida, usa fallback
+    // Se nao conseguiu foto valida, usa fallback SEM cachear
+    // (assim, se a API se recuperar, o numero volta a puxar a foto real)
     if (!photoUrl || !photoUrl.startsWith("http")) {
-      console.log("[v0] No valid photo found, using fallback")
-      
-      // Armazena fallback no cache para este numero
-      cache.set(fullPhone, {
-        result: fallbackPhoto,
-        timestamp: Date.now(),
-      })
-      
+      console.log("[v0] No valid photo found, using fallback (not cached)")
       return NextResponse.json(fallbackPayload, {
         status: 200,
         headers: { "Access-Control-Allow-Origin": "*" },

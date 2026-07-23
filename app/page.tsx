@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useCallback, useEffect, useRef, Suspense } from "react" // Import useRef and Suspense
 import { Button } from "@/components/ui/button"
-import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, ChevronLeft, ChevronRight, Mic, Send, Clock, EyeOff, Zap, ArrowRight, ShieldCheck, Ban } from "lucide-react"
+import { Camera, Flame, Facebook, CheckCircle, MessageCircle, Heart, Upload, ScanEye, User, Calendar, Beaker as Gender, Home, Compass, MessageSquare, X, Star, MapPin, Lock, Phone, PhoneIncoming, PhoneOutgoing, Play, ChevronLeft, ChevronRight, Mic, Send, Clock, EyeOff, Zap, ArrowRight, ShieldCheck, Ban } from "lucide-react"
 import { fetchInstagramProfile, fetchInstagramPosts } from "@/lib/instagram-tracker"
 import { AlertTriangle, Check, Search, HelpCircle, Quote, ThumbsUp, Frown, Meh } from "lucide-react"
 
@@ -649,21 +649,73 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
   onComplete: () => void
   liveViewers: number
 }) {
+  const [showExtra, setShowExtra] = useState(false)
+  const [notice, setNotice] = useState<{ message: string; x: number; y: number } | null>(null)
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Reveal the extra sections (calls & audios) after 5 seconds
+  useEffect(() => {
+    const t = setTimeout(() => setShowExtra(true), 5000)
+    return () => clearTimeout(t)
+  }, [])
+
+  const triggerNotice = (e: React.MouseEvent, message: string) => {
+    setNotice({ message, x: e.clientX, y: e.clientY })
+    if (noticeTimer.current) clearTimeout(noticeTimer.current)
+    noticeTimer.current = setTimeout(() => setNotice(null), 2500)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (noticeTimer.current) clearTimeout(noticeTimer.current)
+    }
+  }, [])
+
   const suspiciousContacts = [
-    { name: "J. R.", label: "AMOR", img: "/images/female-placeholder-1.jpeg", tags: ["DELETING", "SUSPICIOUS"], audio: false },
-    { name: "L. M.", label: "GYM", img: "/images/male-placeholder-1.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
-    { name: "Blocked Contact", label: "", img: "/images/female-placeholder-2.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
-    { name: "C. S.", label: "WORK?", img: "/images/female-placeholder-3.jpeg", tags: ["DELETING", "SUSPICIOUS"], audio: true },
-    { name: "Deleted Contact", label: "SAVED", img: "/images/female-placeholder-4.jpeg", tags: ["DELETING", "SUSPICIOUS", "EVIDENCE"], audio: false },
+    { name: "J. R.", label: "AMOR", img: "/images/new-woman-1.jpeg", tags: ["DELETING", "SUSPICIOUS"], audio: false },
+    { name: "L. M.", label: "GYM", img: "/images/new-man-3.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
+    { name: "Blocked Contact", label: "", img: "/images/new-woman-5.jpeg", tags: ["DELETING", "EVIDENCE"], audio: false },
+    { name: "C. S.", label: "WORK?", img: "/images/new-woman-2.jpg", tags: ["DELETING", "SUSPICIOUS"], audio: true },
+    { name: "Deleted Contact", label: "SAVED", img: "/images/new-woman-3.jpg", tags: ["DELETING", "SUSPICIOUS", "EVIDENCE"], audio: false },
+  ]
+
+  const receivedCalls = [
+    { name: "J. R.", time: "02:47 AM", duration: "48 min", img: "/images/new-woman-1.jpeg" },
+    { name: "Unknown Number", time: "11:32 PM", duration: "1h 12min", img: "/images/new-man-1.jpg" },
+    { name: "C. S.", time: "01:15 AM", duration: "27 min", img: "/images/new-woman-2.jpg" },
+    { name: "Blocked Contact", time: "03:04 AM", duration: "9 min", img: "/images/new-woman-3.jpg" },
+    { name: "L. M.", time: "09:58 PM", duration: "33 min", img: "/images/new-man-2.jpeg" },
+    { name: "Deleted Contact", time: "12:41 AM", duration: "54 min", img: "/images/new-woman-4.avif" },
+  ]
+
+  const madeCalls = [
+    { name: "J. R.", time: "10:22 PM", duration: "1h 03min", img: "/images/new-woman-5.jpeg" },
+    { name: "C. S.", time: "02:19 AM", duration: "41 min", img: "/images/new-man-3.jpeg" },
+    { name: "Unknown Number", time: "11:47 PM", duration: "18 min", img: "/images/new-woman-2.jpg" },
+    { name: "Blocked Contact", time: "12:08 AM", duration: "36 min", img: "/images/new-woman-3.jpg" },
+    { name: "L. M.", time: "08:53 PM", duration: "22 min", img: "/images/new-man-1.jpg" },
+    { name: "Deleted Contact", time: "03:29 AM", duration: "1h 27min", img: "/images/new-woman-4.avif" },
+  ]
+
+  const audioMessages = [
+    { name: "J. R.", time: "02:14 AM", length: "0:47" },
+    { name: "C. S.", time: "11:52 PM", length: "1:23" },
+    { name: "Unknown Number", time: "01:08 AM", length: "0:31" },
+    { name: "Blocked Contact", time: "03:41 AM", length: "2:05" },
+    { name: "L. M.", time: "10:37 PM", length: "0:58" },
+    { name: "Deleted Contact", time: "12:19 AM", length: "1:44" },
+    { name: "J. R.", time: "04:02 AM", length: "0:29" },
+    { name: "C. S.", time: "09:16 PM", length: "1:11" },
+    { name: "Unknown Number", time: "02:55 AM", length: "3:18" },
   ]
 
   const mediaItems = [
-    "/images/liked-photo-1.jpeg",
-    "/images/liked-photo-2.jpeg",
-    "/images/female-placeholder-5.jpeg",
-    "/images/female-placeholder-6.avif",
-    "/images/female-placeholder-7.jpeg",
-    "/images/female-placeholder-8.jpeg",
+    "/images/new-woman-2.jpg",
+    "/images/new-man-2.jpeg",
+    "/images/new-woman-4.avif",
+    "/images/new-man-1.jpg",
+    "/images/new-woman-5.jpeg",
+    "/images/new-woman-3.jpg",
   ]
 
   const tagColor = (tag: string) => {
@@ -762,20 +814,150 @@ function WhatsAppPreviewSection({ onComplete, liveViewers }: {
         </h3>
         <p className="text-xs text-muted-foreground text-left mb-3">View all media shared, including deleted items.</p>
         <div className="grid grid-cols-3 gap-2">
-          {mediaItems.map((img, i) => (
-            <div key={i} className="relative aspect-square rounded-lg overflow-hidden">
-              <img
-                src={img || "/placeholder.svg"}
-                alt=""
-                className="w-full h-full object-cover blur-md"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                <Lock size={20} className="text-white/90" />
-              </div>
-            </div>
-          ))}
+          {mediaItems.map((img, i) => {
+            const isVideo = i % 3 === 2
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={(e) => triggerNotice(e, "Complete your search to see it")}
+                className="relative aspect-square rounded-lg overflow-hidden group cursor-pointer"
+              >
+                <img
+                  src={img || "/placeholder.svg"}
+                  alt=""
+                  className="w-full h-full object-cover blur-md"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40">
+                  {isVideo ? (
+                    <Play size={18} className="text-white/90 fill-white/90" />
+                  ) : (
+                    <Lock size={18} className="text-white/90" />
+                  )}
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wide">See it</span>
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
+
+      {/* Received Calls */}
+      {showExtra && (
+        <div className="rounded-xl bg-card border border-border p-4 animate-fade-in">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
+            <PhoneIncoming size={16} className="text-green-500" />
+            Received Calls
+          </h3>
+          <p className="text-xs text-muted-foreground text-left mb-3">Incoming calls, including late-night activity.</p>
+          <div className="space-y-2">
+            {receivedCalls.map((call, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg bg-background/60 border border-border p-2">
+                <img src={call.img || "/placeholder.svg"} alt="" className="w-10 h-10 rounded-full object-cover blur-[2px] shrink-0" />
+                <div className="flex-1 min-w-0 text-left">
+                  <span className="text-sm font-semibold text-foreground truncate block">{call.name}</span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-green-500 font-semibold flex items-center gap-1">
+                      <PhoneIncoming size={10} /> {call.time}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <Clock size={10} /> {call.duration}
+                    </span>
+                  </div>
+                </div>
+                <Lock size={16} className="text-red-500 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Made Calls */}
+      {showExtra && (
+        <div className="rounded-xl bg-card border border-border p-4 animate-fade-in">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
+            <PhoneOutgoing size={16} className="text-pink-500" />
+            Calls Made
+          </h3>
+          <p className="text-xs text-muted-foreground text-left mb-3">Outgoing calls placed at unusual hours.</p>
+          <div className="space-y-2">
+            {madeCalls.map((call, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg bg-background/60 border border-border p-2">
+                <img src={call.img || "/placeholder.svg"} alt="" className="w-10 h-10 rounded-full object-cover blur-[2px] shrink-0" />
+                <div className="flex-1 min-w-0 text-left">
+                  <span className="text-sm font-semibold text-foreground truncate block">{call.name}</span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-pink-500 font-semibold flex items-center gap-1">
+                      <PhoneOutgoing size={10} /> {call.time}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <Clock size={10} /> {call.duration}
+                    </span>
+                  </div>
+                </div>
+                <Lock size={16} className="text-red-500 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Voice Messages */}
+      {showExtra && (
+        <div className="rounded-xl bg-card border border-border p-4 animate-fade-in">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2 mb-1">
+            <Mic size={16} className="text-orange-400" />
+            Voice Messages
+          </h3>
+          <p className="text-xs text-muted-foreground text-left mb-3">Tap play to listen to recovered audio.</p>
+          <div className="space-y-2">
+            {audioMessages.map((audio, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg bg-background/60 border border-border p-2">
+                <button
+                  type="button"
+                  onClick={(e) => triggerNotice(e, "Complete access to listen")}
+                  className="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/40 flex items-center justify-center shrink-0 hover:bg-green-500/25 transition-colors"
+                  aria-label="Play audio"
+                >
+                  <Play size={14} className="text-green-500 fill-green-500 ml-0.5" />
+                </button>
+                <div className="flex-1 min-w-0 text-left">
+                  <span className="text-sm font-semibold text-foreground truncate block">{audio.name}</span>
+                  {/* Fake waveform */}
+                  <div className="flex items-center gap-0.5 mt-1 h-4">
+                    {Array.from({ length: 22 }).map((_, b) => (
+                      <span
+                        key={b}
+                        className="w-0.5 rounded-full bg-green-500/40"
+                        style={{ height: `${20 + Math.abs(Math.sin(i + b)) * 80}%` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-0.5 shrink-0">
+                  <span className="text-[10px] text-muted-foreground">{audio.length}</span>
+                  <span className="text-[9px] text-muted-foreground/70 flex items-center gap-0.5">
+                    <Clock size={9} /> {audio.time}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Notification toast - small, appears right at the click */}
+      {notice && (
+        <div
+          className="fixed z-50 -translate-x-1/2 -translate-y-full animate-fade-in pointer-events-none"
+          style={{ left: notice.x, top: notice.y - 8 }}
+        >
+          <div className="flex items-center gap-1.5 rounded-lg bg-card border border-pink-500/50 shadow-xl px-2.5 py-1.5 whitespace-nowrap">
+            <Lock size={12} className="text-pink-500 shrink-0" />
+            <span className="text-[11px] font-semibold text-foreground">{notice.message}</span>
+          </div>
+        </div>
+      )}
 
       {/* Final CTA */}
       <Button
