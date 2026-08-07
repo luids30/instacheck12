@@ -1945,9 +1945,11 @@ const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
   const fallbackPhoto = "https://i.postimg.cc/gcNd6QBM/img1.jpg"
 
   try {
-    // Add timeout with AbortController
+    // Add timeout with AbortController.
+    // The WhatsApp photo API is slow (can take 30s+), so we allow a generous
+    // window; otherwise the request aborts early and always shows the fallback.
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 8000) // 8 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000) // 45 second timeout
 
     const response = await fetch("/api/whatsapp-photo", {
       method: "POST",

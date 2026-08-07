@@ -1,5 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 
+// The WhatsApp photo API is slow (can take 30s+), so allow the serverless
+// function enough time to finish instead of being killed early in production.
+export const maxDuration = 60
+
 // Cache para armazenar resultados por 5 minutos
 const cache = new Map<string, { result: string; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
