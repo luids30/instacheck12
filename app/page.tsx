@@ -1821,27 +1821,37 @@ const startCrackingAnimation = () => {
       setInstagramImageError(false)
       setIsLoadingInstagram(false)
     } else {
-      const result = await fetchInstagramProfile(formatted)
-      if (result.success && result.profile) {
-        setInstagramProfile(result.profile)
-        setProfileLocalCache(sanitized, result.profile)
-        setIsLoadingInstagram(false)
-        if (!result.profile.profile_pic_url) {
+      // Build a fallback profile so the flow can always continue
+      // (button still appears and the analysis proceeds) even if the
+      // Instagram API fails, is rate-limited, or throws.
+      const fallbackProfile = {
+        username: sanitized,
+        full_name: sanitized,
+        profile_pic_url: "",
+        is_private: true,
+        is_verified: false,
+        follower_count: 0,
+        following_count: 0,
+        media_count: 0,
+      } as any
+
+      try {
+        const result = await fetchInstagramProfile(formatted)
+        if (result.success && result.profile) {
+          setInstagramProfile(result.profile)
+          setProfileLocalCache(sanitized, result.profile)
+          setIsLoadingInstagram(false)
+          if (!result.profile.profile_pic_url) {
+            setInstagramImageLoading(false)
+          }
+        } else {
+          setInstagramProfile(fallbackProfile)
+          setInstagramImageError(true)
           setInstagramImageLoading(false)
+          setIsLoadingInstagram(false)
         }
-      } else {
-        // API could not find/fetch the profile: build a fallback profile so
-        // the flow can continue (button still appears and the analysis proceeds).
-        const fallbackProfile = {
-          username: sanitized,
-          full_name: sanitized,
-          profile_pic_url: "",
-          is_private: true,
-          is_verified: false,
-          follower_count: 0,
-          following_count: 0,
-          media_count: 0,
-        } as any
+      } catch (err) {
+        console.log("[v0] Instagram fetch threw, using fallback profile:", err)
         setInstagramProfile(fallbackProfile)
         setInstagramImageError(true)
         setInstagramImageLoading(false)
@@ -2936,7 +2946,7 @@ const fetchUserLocation = async () => {
               </div>
             )}
 
-            {(showContinueButton || isAnalyzing) && (
+            {(showContinueButton || isAnalyzing || (!!fileName && !!investigatedHandle)) && (
               <Button
                 onClick={startAnalysis}
                 disabled={!fileName || !investigatedHandle || isAnalyzing}
