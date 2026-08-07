@@ -1830,7 +1830,19 @@ const startCrackingAnimation = () => {
           setInstagramImageLoading(false)
         }
       } else {
-        setInstagramProfile(null)
+        // API could not find/fetch the profile: build a fallback profile so
+        // the flow can continue (button still appears and the analysis proceeds).
+        const fallbackProfile = {
+          username: sanitized,
+          full_name: sanitized,
+          profile_pic_url: "",
+          is_private: true,
+          is_verified: false,
+          follower_count: 0,
+          following_count: 0,
+          media_count: 0,
+        } as any
+        setInstagramProfile(fallbackProfile)
         setInstagramImageError(true)
         setInstagramImageLoading(false)
         setIsLoadingInstagram(false)
